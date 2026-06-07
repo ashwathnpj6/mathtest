@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Numbers - Assessment Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-gradient-1: #e0e7ff;
+            --bg-gradient-2: #ede9fe;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --text-dark: #0f172a;
+            --text-muted: #475569;
+            --success: #059669;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --review: #7c3aed;
+            --border-light: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-1), var(--bg-gradient-2));
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 1200px;
+            min-height: 80vh;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .active-view { display: flex; }
+
+        /* --- LOGIN VIEW --- */
+        #login-view { justify-content: center; align-items: center; text-align: center; padding: 40px; }
+        .login-box {
+            background: rgba(255, 255, 255, 0.95); padding: 50px;
+            border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            max-width: 500px; width: 100%; border: 1px solid var(--border-light);
+        }
+        h1 { font-size: 2.2rem; margin-bottom: 10px; color: var(--text-dark); letter-spacing: -0.5px; }
+        p.subtitle { color: var(--text-muted); margin-bottom: 30px; font-size: 1.1rem; }
+
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; color: #334155; }
+        .input-group input {
+            width: 100%; padding: 14px; border-radius: 12px;
+            border: 1px solid #cbd5e1; font-size: 1rem;
+            outline: none; transition: border 0.3s;
+        }
+        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+
+        .btn {
+            background: var(--primary); color: white; border: none;
+            padding: 14px 28px; border-radius: 10px; font-size: 1rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; display: inline-block;
+        }
+        .btn:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        .btn-outline { background: transparent; border: 1px solid var(--border-light); color: var(--text-dark); }
+        .btn-outline:hover { background: #f1f5f9; }
+
+        /* --- EXAM VIEW --- */
+        .header {
+            padding: 20px 30px; border-bottom: 1px solid var(--border-light);
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.8);
+        }
+        .progress-container { width: 100%; height: 4px; background: #e2e8f0; }
+        .progress-bar { height: 100%; background: var(--primary); width: 0%; transition: width 0.4s ease; }
+        .exam-body { display: flex; flex: 1; overflow: hidden; flex-direction: row; background: #fcfcfc; }
+        .main-content { flex: 3; padding: 40px; display: flex; flex-direction: column; overflow-y: auto; }
+        
+        .question-number { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .question-text { font-size: 1.3rem; font-weight: 500; margin-bottom: 30px; line-height: 1.6; color: var(--text-dark); }
+        
+        .options-grid { display: grid; gap: 12px; }
+        .option {
+            background: white; border: 1px solid #cbd5e1; padding: 16px 20px;
+            border-radius: 10px; cursor: pointer; font-size: 1.05rem;
+            transition: all 0.2s; display: flex; align-items: center; color: #334155;
+        }
+        .option:hover { border-color: var(--primary); background: #f8fafc; }
+        .option.selected { border-color: var(--primary); background: #eff6ff; font-weight: 500; }
+        
+        .controls { margin-top: auto; padding-top: 30px; display: flex; justify-content: space-between; gap: 15px; border-top: 1px solid var(--border-light); }
+        
+        /* Sidebar Palette */
+        .sidebar {
+            flex: 1; border-left: 1px solid var(--border-light); background: #f8fafc;
+            padding: 24px; display: flex; flex-direction: column; max-width: 320px;
+        }
+        .palette-header { font-weight: 600; margin-bottom: 15px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+        .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow-y: auto; padding-right: 5px; align-content: start; }
+        .palette-btn {
+            aspect-ratio: 1; border-radius: 6px; border: 1px solid #cbd5e1;
+            background: white; font-weight: 500; cursor: pointer; transition: 0.1s; font-size: 0.9rem; color: #475569;
+        }
+        .palette-btn.answered { background: var(--text-dark); color: white; border-color: var(--text-dark); }
+        .palette-btn.review { background: #fef08a; border-color: #eab308; color: #854d0e; }
+        .palette-btn.active { box-shadow: 0 0 0 2px white, 0 0 0 4px var(--primary); border-color: transparent; }
+
+        /* --- PROFESSIONAL RESULT VIEW --- */
+        #result-view { 
+            background: #f1f5f9; /* Solid professional background */
+            padding: 40px; 
+            overflow-y: auto; 
+            align-items: center; 
+        }
+        
+        .official-report-card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 50px;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        .report-header-section {
+            border-bottom: 3px solid var(--text-dark);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .report-header-section h1 { font-size: 1.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dark); margin: 0; }
+        .report-meta { text-align: right; color: var(--text-muted); font-size: 0.85rem; }
+
+        .candidate-table {
+            width: 100%; border-collapse: collapse; margin-bottom: 40px;
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;
+        }
+        .candidate-table td { padding: 12px 20px; border-bottom: 1px solid #e2e8f0; font-size: 0.95rem; }
+        .candidate-table td:nth-child(odd) { font-weight: 600; color: var(--text-muted); width: 20%; border-right: 1px solid #e2e8f0; }
+        .candidate-table td:nth-child(even) { font-weight: 500; color: var(--text-dark); width: 30%; border-right: 1px solid #e2e8f0; }
+
+        .score-dashboard {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .primary-score-box {
+            flex: 1;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .primary-score-box .label { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .primary-score-box .score { font-size: 4rem; font-weight: 800; color: var(--text-dark); line-height: 1; }
+        .primary-score-box .grade { font-size: 1.5rem; font-weight: 600; color: var(--primary); margin-top: 5px; }
+
+        .metrics-grid {
+            flex: 2;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .metric-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            background: #ffffff;
+        }
+        .metric-card.m-correct { border-top: 4px solid var(--success); }
+        .metric-card.m-incorrect { border-top: 4px solid var(--danger); }
+        .metric-card.m-omitted { border-top: 4px solid var(--warning); }
+        
+        .metric-card .num { font-size: 2rem; font-weight: 700; margin-bottom: 5px; color: var(--text-dark); }
+        .metric-card .desc { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+
+        .section-title { font-size: 1.2rem; font-weight: 700; color: var(--text-dark); border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 20px; margin-top: 40px; }
+
+        .topic-analysis-table {
+            width: 100%; border-collapse: collapse; margin-bottom: 30px;
+        }
+        .topic-analysis-table th { background: #f1f5f9; font-weight: 600; color: var(--text-dark); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; border-bottom: 2px solid #cbd5e1; }
+        .topic-analysis-table th, .topic-analysis-table td { padding: 14px 15px; text-align: left; }
+        .topic-analysis-table td { border-bottom: 1px solid #e2e8f0; font-size: 0.95rem; font-weight: 500; color: #334155; }
+        .topic-analysis-table .accuracy-bar-container { width: 100px; height: 6px; background: #e2e8f0; border-radius: 3px; display: inline-block; vertical-align: middle; margin-right: 10px; }
+        .topic-analysis-table .accuracy-bar { height: 100%; border-radius: 3px; background: var(--primary); }
+
+        .competency-summary {
+            background: #f8fafc; border-left: 4px solid var(--primary); padding: 20px; border-radius: 0 6px 6px 0; margin-bottom: 40px;
+        }
+        .competency-summary h4 { margin-bottom: 10px; color: var(--text-dark); font-size: 1.05rem; }
+        .competency-summary p { font-size: 0.95rem; color: #475569; line-height: 1.6; margin-bottom: 8px; }
+
+        .print-actions { text-align: right; margin-bottom: 20px; }
+        
+        .detailed-review-list { margin-top: 20px; }
+        .review-row { padding: 20px 0; border-bottom: 1px solid #e2e8f0; }
+        .review-row:last-child { border-bottom: none; }
+        .r-header { display: flex; align-items: center; margin-bottom: 10px; }
+        .r-badge { padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-right: 12px; }
+        .r-badge.b-correct { background: #d1fae5; color: #065f46; }
+        .r-badge.b-incorrect { background: #fee2e2; color: #991b1b; }
+        .r-badge.b-omitted { background: #fef3c7; color: #92400e; }
+        .r-question { font-weight: 600; color: var(--text-dark); font-size: 1rem; }
+        .r-answers { margin-top: 10px; font-size: 0.9rem; color: #475569; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8fafc; padding: 12px; border-radius: 6px; }
+
+        @media (max-width: 768px) {
+            .exam-body { flex-direction: column; }
+            .sidebar { max-width: 100%; border-left: none; border-top: 1px solid var(--border-light); max-height: 250px; }
+            .candidate-table td { display: block; width: 100% !important; border-right: none; }
+            .score-dashboard { flex-direction: column; }
+            .metrics-grid { grid-template-columns: 1fr; }
+            .topic-analysis-table { display: block; overflow-x: auto; white-space: nowrap; }
+            .r-answers { grid-template-columns: 1fr; }
+        }
+        
+        @media print {
+            body { background: white; padding: 0; }
+            .glass-panel { box-shadow: none; border: none; border-radius: 0; }
+            #result-view { background: white; padding: 0; }
+            .official-report-card { border: none; box-shadow: none; padding: 0; max-width: 100%; }
+            .print-actions { display: none; }
+            .detailed-review-list { page-break-before: always; }
+            .review-row { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-view" class="glass-panel active-view">
+        <div class="login-box">
+            <h1>Assessment Portal</h1>
+            <p class="subtitle">Unit Test: Real Numbers (Class 10)</p>
+            
+            <div class="input-group">
+                <label for="student-name">Candidate Full Name</label>
+                <input type="text" id="student-name" placeholder="Enter your official name" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label for="student-class">Class / Section</label>
+                <input type="text" id="student-class" placeholder="e.g., 10-A" autocomplete="off">
+            </div>
+            
+            <button class="btn" style="width: 100%; margin-top: 10px;" onclick="startExam()">Commence Assessment</button>
+        </div>
+    </div>
+
+    <div id="exam-view" class="glass-panel">
+        <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+        <div class="header">
+            <div>
+                <span id="display-name" style="font-weight: 600; color: var(--text-dark);"></span>
+                <span style="color: #cbd5e1; margin: 0 10px;">|</span>
+                <span id="display-class" style="color: var(--text-muted); font-weight: 500;"></span>
+            </div>
+            <div style="font-weight: 600; color: var(--text-muted); font-size: 0.9rem;">Exam ID: <span id="display-exam-id"></span></div>
+        </div>
+        
+        <div class="exam-body">
+            <div class="main-content">
+                <div class="question-number" id="q-number">Question 1 of 60</div>
+                <div class="question-text" id="q-text">Loading question...</div>
+                
+                <div class="options-grid" id="options-container">
+                    </div>
+                
+                <div class="controls">
+                    <button class="btn btn-outline" onclick="prevQuestion()" id="btn-prev">Previous</button>
+                    <button class="btn btn-outline" style="color: #854d0e; border-color: #fef08a; background: #fef9c3;" onclick="toggleReview()" id="btn-review">Mark for Review</button>
+                    <button class="btn" onclick="nextQuestion()" id="btn-next">Next</button>
+                    <button class="btn" style="background: var(--text-dark); display: none;" onclick="submitExam()" id="btn-submit">Submit Assessment</button>
+                </div>
+            </div>
+            
+            <div class="sidebar">
+                <div class="palette-header">Question Navigator</div>
+                <div class="palette-grid" id="palette-grid">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-view" class="glass-panel">
+        <div class="official-report-card">
+            
+            <div class="print-actions">
+                <button class="btn btn-outline" onclick="window.print()">🖨️ Print Official Report</button>
+            </div>
+
+            <div class="report-header-section">
+                <h1>Official Assessment Report</h1>
+                <div class="report-meta">
+                    <div><strong>Date:</strong> <span id="report-date"></span></div>
+                    <div><strong>Module:</strong> Mathematics - Chapter 1</div>
+                </div>
+            </div>
+
+            <table class="candidate-table">
+                <tr>
+                    <td>Candidate Name</td>
+                    <td id="rep-name">John Doe</td>
+                    <td>Class / Section</td>
+                    <td id="rep-class">10-A</td>
+                </tr>
+                <tr>
+                    <td>Assessment ID</td>
+                    <td id="rep-id">RN-101-XXX</td>
+                    <td>Total Questions</td>
+                    <td>60</td>
+                </tr>
+            </table>
+
+            <div class="score-dashboard">
+                <div class="primary-score-box">
+                    <div class="label">Total Score</div>
+                    <div class="score" id="rep-score">100%</div>
+                    <div class="grade" id="rep-grade">Grade: A+</div>
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-card m-correct">
+                        <div class="num" id="rep-correct">0</div>
+                        <div class="desc">Correct</div>
+                    </div>
+                    <div class="metric-card m-incorrect">
+                        <div class="num" id="rep-incorrect">0</div>
+                        <div class="desc">Incorrect</div>
+                    </div>
+                    <div class="metric-card m-omitted">
+                        <div class="num" id="rep-omitted">0</div>
+                        <div class="desc">Omitted</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">Performance by Sub-Topic</div>
+            <table class="topic-analysis-table" id="topic-table">
+                <thead>
+                    <tr>
+                        <th>Topic Domain</th>
+                        <th>Questions</th>
+                        <th>Correct</th>
+                        <th>Accuracy</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="topic-table-body">
+                    </tbody>
+            </table>
+
+            <div class="section-title">Competency Summary</div>
+            <div class="competency-summary" id="competency-text">
+                </div>
+
+            <div class="section-title">Detailed Question Review</div>
+            <div class="detailed-review-list" id="detailed-review-list">
+                </div>
+            
+        </div>
+    </div>
+
+<script>
+    // 60 Unique Questions strictly based on the PDF content
+    const examQuestions = [
+        { t: "Fundamental Theorem", q: "The Fundamental Theorem of Arithmetic states that every composite number can be expressed as a product of:", o: ["Even numbers", "Odd numbers", "Primes", "Rational numbers"], a: 2 },
+        { t: "Fundamental Theorem", q: "According to the Fundamental Theorem of Arithmetic, the prime factorisation of a composite number is unique, apart from:", o: ["The size of the primes", "The order in which the prime factors occur", "The number of composite factors", "The parity of the numbers"], a: 1 },
+        { t: "Fundamental Theorem", q: "Who gave the first correct proof of the Fundamental Theorem of Arithmetic?", o: ["Euclid", "Archimedes", "Newton", "Carl Friedrich Gauss"], a: 3 },
+        { t: "Fundamental Theorem", q: "In which publication did Carl Friedrich Gauss give the first correct proof of the Fundamental Theorem of Arithmetic?", o: ["Elements", "Principia Mathematica", "Disquisitiones Arithmeticae", "Arithmetica"], a: 2 },
+        { t: "Fundamental Theorem", q: "An equivalent version of the Fundamental Theorem of Arithmetic was probably first recorded in which book?", o: ["Book IX in Euclid's Elements", "Book I in Euclid's Elements", "Gauss's Disquisitiones", "Newton's Principia"], a: 0 },
+        { t: "Fundamental Theorem", q: "What is the prime factorisation of 32760?", o: ["2³ × 3² × 5 × 7 × 13", "2² × 3³ × 5 × 7 × 11", "2³ × 3² × 5² × 7", "2 × 3² × 5 × 7 × 13²"], a: 0 },
+        { t: "Fundamental Theorem", q: "True or False: There are infinitely many prime numbers.", o: ["True", "False", "Cannot be determined", "Only up to 1 million"], a: 0 },
+        { t: "Fundamental Theorem", q: "Assertion (A): Any natural number can be obtained by multiplying prime numbers. Reason (R): This is guaranteed by the Fundamental Theorem of Arithmetic for composite numbers.", o: ["Both A and R are true and R is correct explanation", "Both A and R are true but R is not correct explanation", "A is true, R is false", "A is false, R is true"], a: 0 },
+        { t: "Fundamental Theorem", q: "If 4^n ends with the digit zero for some natural number n, what prime must be in its prime factorisation?", o: ["2", "3", "5", "7"], a: 2 },
+        { t: "Fundamental Theorem", q: "Why can the number 4^n NEVER end with the digit 0 for any natural number n?", o: ["Its factorisation only contains 2, not 5", "It is an even number", "It is an odd number", "n is a natural number"], a: 0 },
+        { t: "Fundamental Theorem", q: "Fill in the blank: The prime factorisation of a natural number is unique, except for the ________ of its factors.", o: ["Magnitude", "Order", "Sign", "Power"], a: 1 },
+        { t: "Fundamental Theorem", q: "What is the prime factorisation of 140?", o: ["2² × 5 × 7", "2 × 5² × 7", "2² × 3 × 5", "2 × 3 × 7²"], a: 0 },
+        { t: "Fundamental Theorem", q: "What is the prime factorisation of 156?", o: ["2² × 3 × 13", "2 × 3² × 13", "2² × 5 × 11", "2 × 3 × 17"], a: 0 },
+        { t: "Fundamental Theorem", q: "What is the prime factorisation of 3825?", o: ["3² × 5² × 17", "3 × 5² × 19", "3² × 5 × 23", "2² × 5² × 17"], a: 0 },
+        { t: "Fundamental Theorem", q: "What is the prime factorisation of 5005?", o: ["5 × 7 × 11 × 13", "5 × 7² × 13", "5 × 11 × 17", "5 × 7 × 13²"], a: 0 },
+        { t: "Fundamental Theorem", q: "What is the prime factorisation of 7429?", o: ["17 × 19 × 23", "13 × 17 × 19", "19 × 23 × 29", "17 × 23 × 29"], a: 0 },
+        { t: "Fundamental Theorem", q: "Which of the following is considered one of the three greatest mathematicians of all time along with Archimedes and Newton?", o: ["Euclid", "Pythagoras", "Carl Friedrich Gauss", "Euler"], a: 2 },
+        { t: "Fundamental Theorem", q: "By convention, when applying the unique factorization theorem, how do we write the prime factors?", o: ["Descending order", "Ascending order", "Random order", "Grouped by odd and even"], a: 1 },
+        { t: "Fundamental Theorem", q: "Evaluate 2 × 3 × 7 × 11 × 23.", o: ["1771", "5313", "10626", "21252"], a: 2 },
+        { t: "Fundamental Theorem", q: "Why is 7 × 11 × 13 + 13 a composite number?", o: ["It ends in an even number", "It can be factored as 13 × (77 + 1)", "It is a prime number", "It is a perfect square"], a: 1 },
+
+        { t: "HCF & LCM", q: "The HCF of two numbers is defined as:", o: ["Product of the greatest power of each common prime factor", "Product of the smallest power of each common prime factor", "Sum of all prime factors", "Product of all prime factors"], a: 1 },
+        { t: "HCF & LCM", q: "The LCM of two numbers is defined as:", o: ["Product of the smallest power of each common prime", "Product of the greatest power of each prime factor involved", "The largest prime factor", "The smallest common prime factor"], a: 1 },
+        { t: "HCF & LCM", q: "For any two positive integers a and b, which equation holds true?", o: ["HCF(a,b) + LCM(a,b) = a + b", "HCF(a,b) × LCM(a,b) = a × b", "LCM(a,b) / HCF(a,b) = a × b", "HCF(a,b) = a × b × LCM(a,b)"], a: 1 },
+        { t: "HCF & LCM", q: "What is the HCF of 6 and 20?", o: ["2", "4", "6", "10"], a: 0 },
+        { t: "HCF & LCM", q: "What is the LCM of 6 and 20?", o: ["30", "60", "120", "20"], a: 1 },
+        { t: "HCF & LCM", q: "If the prime factorisation of 96 is 2^5 × 3, and 404 is 2^2 × 101, what is their HCF?", o: ["2", "4", "8", "16"], a: 1 },
+        { t: "HCF & LCM", q: "Using the formula, if HCF(96, 404) = 4, what is LCM(96, 404)?", o: ["9696", "4848", "101", "38784"], a: 0 },
+        { t: "HCF & LCM", q: "Find the HCF of 6, 72, and 120 using prime factorisation.", o: ["2", "3", "6", "12"], a: 2 },
+        { t: "HCF & LCM", q: "Find the LCM of 6, 72, and 120.", o: ["120", "360", "720", "4320"], a: 1 },
+        { t: "HCF & LCM", q: "True or False: For three numbers p, q, r, the product p × q × r is always equal to HCF(p,q,r) × LCM(p,q,r).", o: ["True", "False", "Only if they are prime", "Only if they are even"], a: 1 },
+        { t: "HCF & LCM", q: "What is the formula for LCM(p, q, r) involving HCFs?", o: ["(p·q·r · HCF(p,q,r)) / (HCF(p,q)·HCF(q,r)·HCF(p,r))", "(HCF(p,q)·HCF(q,r)) / p·q·r", "p·q·r / HCF(p,q,r)", "It doesn't exist"], a: 0 },
+        { t: "HCF & LCM", q: "Find the HCF of 26 and 91.", o: ["13", "7", "2", "26"], a: 0 },
+        { t: "HCF & LCM", q: "Find the LCM of 26 and 91.", o: ["182", "91", "2366", "364"], a: 0 },
+        { t: "HCF & LCM", q: "Given HCF(306, 657) = 9, find LCM(306, 657).", o: ["22338", "3400", "201042", "2238"], a: 0 },
+        { t: "HCF & LCM", q: "Find the HCF of 17, 23, and 29.", o: ["1", "17", "23", "29"], a: 0 },
+        { t: "HCF & LCM", q: "Find the LCM of 17, 23, and 29.", o: ["1", "11339", "1139", "10339"], a: 1 },
+        { t: "HCF & LCM", q: "Find the HCF of 8, 9, and 25.", o: ["1", "2", "3", "5"], a: 0 },
+        { t: "HCF & LCM", q: "Find the LCM of 8, 9, and 25.", o: ["1800", "72", "200", "225"], a: 0 },
+        { t: "HCF & LCM", q: "Sonia takes 18 mins to drive a round, Ravi takes 12 mins. If they start together, after how many minutes will they meet again at the start?", o: ["24", "30", "36", "42"], a: 2 },
+        { t: "HCF & LCM", q: "What mathematical concept is required to solve the Sonia and Ravi sports field problem?", o: ["HCF", "LCM", "Irrationality", "Proof by contradiction"], a: 1 },
+
+        { t: "Irrationality", q: "A number 's' is called irrational if it cannot be written in the form p/q, where p and q are integers and:", o: ["q = 0", "q ≠ 0", "p = 0", "p ≠ 0"], a: 1 },
+        { t: "Irrationality", q: "Theorem 1.2 states: Let p be a prime number. If p divides a², then:", o: ["p divides a", "a divides p", "p = a", "p divides 2a"], a: 0 },
+        { t: "Irrationality", q: "The proof that √2 is irrational is based on a technique called:", o: ["Proof by induction", "Proof by contradiction", "Direct proof", "Proof by exhaustion"], a: 1 },
+        { t: "Irrationality", q: "When proving √2 is irrational, we assume √2 = a/b. What must be true about integers a and b initially?", o: ["They are coprime", "They are even", "They are both prime", "They share a factor of 2"], a: 0 },
+        { t: "Irrationality", q: "In the proof of √2 being irrational, we deduce that 2 divides a² and 2 divides b². This means a and b have at least what common factor?", o: ["1", "2", "3", "4"], a: 1 },
+        { t: "Irrationality", q: "The sum or difference of a rational and an irrational number is always:", o: ["Rational", "Irrational", "Zero", "An integer"], a: 1 },
+        { t: "Irrationality", q: "The product and quotient of a non-zero rational and irrational number is always:", o: ["Rational", "Irrational", "One", "Undefined"], a: 1 },
+        { t: "Irrationality", q: "If we assume 5 - √3 is rational, we can write 5 - √3 = a/b. Rearranging gives √3 = (5b - a)/b. This contradicts the fact that:", o: ["a/b is rational", "√3 is irrational", "5 is rational", "a and b are integers"], a: 1 },
+        { t: "Irrationality", q: "If we assume 3√2 is rational (a/b), rearranging gives √2 = a/(3b). Why does this lead to a contradiction?", o: ["a/(3b) is irrational", "√2 is irrational but a/(3b) is rational", "3 is not a prime", "b cannot be 0"], a: 1 },
+        { t: "Irrationality", q: "Which of the following numbers is irrational?", o: ["22/7", "√4", "√2", "0"], a: 2 },
+        { t: "Irrationality", q: "Which of the following numbers is irrational?", o: ["3.14159...", "1.232323...", "5/9", "√9"], a: 0 },
+        { t: "Irrationality", q: "To prove √3 is irrational, we reach a step where b² = 3c². What does this imply?", o: ["3 divides b²", "b divides 3", "c divides 3", "b is prime"], a: 0 },
+        { t: "Irrationality", q: "Match: Number form 0.10110111011110...", o: ["Rational terminating", "Rational repeating", "Irrational", "Integer"], a: 2 },
+        { t: "Irrationality", q: "Is 1/√2 rational or irrational?", o: ["Rational", "Irrational", "Integer", "Whole Number"], a: 1 },
+        { t: "Irrationality", q: "Is 7√5 rational or irrational?", o: ["Rational", "Irrational", "Integer", "Natural Number"], a: 1 },
+        { t: "Irrationality", q: "Is 6 + √2 rational or irrational?", o: ["Rational", "Irrational", "Integer", "Complex Number"], a: 1 },
+        { t: "Irrationality", q: "Assertion (A): √5 is an irrational number. Reason (R): 5 is a prime number, and the square root of any prime number is irrational.", o: ["Both A and R are true and R is correct explanation", "Both A and R are true but R is not correct explanation", "A is true, R is false", "A is false, R is true"], a: 0 },
+        { t: "Irrationality", q: "If p is a prime number and it divides a², where 'a' is a positive integer, does p divide 'a'?", o: ["Yes, always", "No, never", "Only if a is prime", "Only if p = a"], a: 0 },
+        { t: "Irrationality", q: "If a = p1·p2...pn is the prime factorization of a, what are the ONLY prime factors of a²?", o: ["Different primes", "p1, p2, ... pn", "Only p1", "It cannot be determined"], a: 1 },
+        { t: "Irrationality", q: "In the context of real numbers, which two sets together make up the real numbers?", o: ["Integers and Fractions", "Rationals and Irrationals", "Primes and Composites", "Natural and Whole Numbers"], a: 1 }
+    ];
+
+    // State
+    let currentQ = 0;
+    let studentAnswers = new Array(examQuestions.length).fill(null);
+    let markedForReview = new Array(examQuestions.length).fill(false);
+    let studentName = "";
+    let studentClass = "";
+    let examID = "RN-" + Math.floor(1000 + Math.random() * 9000);
+
+    // DOM Elements
+    const loginView = document.getElementById('login-view');
+    const examView = document.getElementById('exam-view');
+    const resultView = document.getElementById('result-view');
+    
+    function startExam() {
+        const nameInput = document.getElementById('student-name').value.trim();
+        const classInput = document.getElementById('student-class').value.trim();
+        
+        if (!nameInput || !classInput) {
+            alert("Please enter Candidate Name and Class to proceed.");
+            return;
+        }
+        
+        studentName = nameInput;
+        studentClass = classInput;
+        
+        document.getElementById('display-name').textContent = studentName;
+        document.getElementById('display-class').textContent = studentClass;
+        document.getElementById('display-exam-id').textContent = examID;
+        
+        loginView.classList.remove('active-view');
+        examView.classList.add('active-view');
+        
+        initPalette();
+        loadQuestion(0);
+    }
+
+    function initPalette() {
+        const grid = document.getElementById('palette-grid');
+        grid.innerHTML = '';
+        for (let i = 0; i < examQuestions.length; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'palette-btn';
+            btn.textContent = i + 1;
+            btn.onclick = () => loadQuestion(i);
+            btn.id = `pal-${i}`;
+            grid.appendChild(btn);
+        }
+    }
+
+    function updatePaletteUI() {
+        for (let i = 0; i < examQuestions.length; i++) {
+            const btn = document.getElementById(`pal-${i}`);
+            btn.className = 'palette-btn';
+            if (i === currentQ) btn.classList.add('active');
+            if (markedForReview[i]) btn.classList.add('review');
+            else if (studentAnswers[i] !== null) btn.classList.add('answered');
+        }
+    }
+
+    function loadQuestion(index) {
+        currentQ = index;
+        const qData = examQuestions[index];
+        
+        document.getElementById('q-number').textContent = `Question ${index + 1} of ${examQuestions.length}`;
+        document.getElementById('q-text').textContent = qData.q;
+        
+        const optsContainer = document.getElementById('options-container');
+        optsContainer.innerHTML = '';
+        qData.o.forEach((optText, optIndex) => {
+            const optDiv = document.createElement('div');
+            optDiv.className = 'option';
+            if (studentAnswers[index] === optIndex) optDiv.classList.add('selected');
+            optDiv.innerHTML = `<strong>${String.fromCharCode(65 + optIndex)}.</strong> <span style="margin-left: 10px;">${optText}</span>`;
+            optDiv.onclick = () => selectOption(optIndex);
+            optsContainer.appendChild(optDiv);
+        });
+
+        document.getElementById('btn-prev').disabled = (index === 0);
+        
+        if (index === examQuestions.length - 1) {
+            document.getElementById('btn-next').style.display = 'none';
+            document.getElementById('btn-submit').style.display = 'inline-block';
+        } else {
+            document.getElementById('btn-next').style.display = 'inline-block';
+            document.getElementById('btn-submit').style.display = 'none';
+        }
+        
+        const revBtn = document.getElementById('btn-review');
+        revBtn.textContent = markedForReview[index] ? "Unmark Review" : "Mark for Review";
+        
+        const answeredCount = studentAnswers.filter(a => a !== null).length;
+        document.getElementById('progress-bar').style.width = `${(answeredCount / examQuestions.length) * 100}%`;
+
+        updatePaletteUI();
+    }
+
+    function selectOption(optIndex) {
+        studentAnswers[currentQ] = optIndex;
+        loadQuestion(currentQ);
+    }
+
+    function nextQuestion() { if (currentQ < examQuestions.length - 1) loadQuestion(currentQ + 1); }
+    function prevQuestion() { if (currentQ > 0) loadQuestion(currentQ - 1); }
+    
+    function toggleReview() {
+        markedForReview[currentQ] = !markedForReview[currentQ];
+        loadQuestion(currentQ);
+    }
+
+    function submitExam() {
+        const unanswered = studentAnswers.filter(a => a === null).length;
+        if (unanswered > 0) {
+            if (!confirm(`Warning: You have ${unanswered} omitted questions. Proceed to official submission?`)) return;
+        }
+        
+        generateProfessionalReport();
+        examView.classList.remove('active-view');
+        resultView.classList.add('active-view');
+    }
+
+    function generateProfessionalReport() {
+        // Date formatting
+        const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+        document.getElementById('report-date').textContent = new Date().toLocaleDateString('en-US', dateOptions);
+        
+        document.getElementById('rep-name').textContent = studentName;
+        document.getElementById('rep-class').textContent = studentClass;
+        document.getElementById('rep-id').textContent = examID;
+        
+        let correct = 0, wrong = 0, omitted = 0;
+        const topics = {};
+        const reviewList = document.getElementById('detailed-review-list');
+        reviewList.innerHTML = '';
+
+        examQuestions.forEach((q, i) => {
+            if (!topics[q.t]) topics[q.t] = { total: 0, correct: 0 };
+            topics[q.t].total++;
+
+            const ans = studentAnswers[i];
+            let badgeClass = 'b-incorrect';
+            let badgeText = 'Incorrect';
+
+            if (ans === null) {
+                omitted++;
+                badgeClass = 'b-omitted'; badgeText = 'Omitted';
+            } else if (ans === q.a) {
+                correct++;
+                topics[q.t].correct++;
+                badgeClass = 'b-correct'; badgeText = 'Correct';
+            } else {
+                wrong++;
+            }
+
+            // Review HTML
+            const row = document.createElement('div');
+            row.className = 'review-row';
+            row.innerHTML = `
+                <div class="r-header">
+                    <span class="r-badge ${badgeClass}">${badgeText}</span>
+                    <span style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Q${i + 1} &bull; ${q.t}</span>
+                </div>
+                <div class="r-question">${q.q}</div>
+                <div class="r-answers">
+                    <div><strong>Candidate Response:</strong> <br> ${ans !== null ? q.o[ans] : '<em>None</em>'}</div>
+                    <div><strong>Key / Correct Answer:</strong> <br> <span style="color: var(--success); font-weight: 600;">${q.o[q.a]}</span></div>
+                </div>
+            `;
+            reviewList.appendChild(row);
+        });
+
+        // Main Scores
+        const percentage = Math.round((correct / examQuestions.length) * 100);
+        document.getElementById('rep-score').textContent = `${percentage}%`;
+        document.getElementById('rep-correct').textContent = correct;
+        document.getElementById('rep-incorrect').textContent = wrong;
+        document.getElementById('rep-omitted').textContent = omitted;
+
+        let gradeStr = 'Needs Remediation (F)';
+        if (percentage >= 90) gradeStr = 'Distinction (A+)';
+        else if (percentage >= 80) gradeStr = 'Advanced (A)';
+        else if (percentage >= 70) gradeStr = 'Proficient (B)';
+        else if (percentage >= 60) gradeStr = 'Basic (C)';
+        document.getElementById('rep-grade').textContent = `Classification: ${gradeStr}`;
+
+        // Build Topic Table
+        const tbody = document.getElementById('topic-table-body');
+        tbody.innerHTML = '';
+        let weaknesses = [];
+
+        for (const [topic, data] of Object.entries(topics)) {
+            const acc = Math.round((data.correct / data.total) * 100);
+            let status = acc >= 75 ? '<span style="color:var(--success);font-weight:600;">Mastered</span>' : 
+                         acc >= 50 ? '<span style="color:var(--warning);font-weight:600;">Developing</span>' : 
+                         '<span style="color:var(--danger);font-weight:600;">Deficient</span>';
+            
+            if (acc < 70) weaknesses.push(topic);
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${topic}</strong></td>
+                <td>${data.total}</td>
+                <td>${data.correct}</td>
+                <td>
+                    <div class="accuracy-bar-container"><div class="accuracy-bar" style="width: ${acc}%; background: ${acc < 50 ? 'var(--danger)' : acc < 75 ? 'var(--warning)' : 'var(--success)'};"></div></div>
+                    ${acc}%
+                </td>
+                <td>${status}</td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        // Competency Summary Text
+        const summary = document.getElementById('competency-text');
+        if (weaknesses.length === 0) {
+            summary.innerHTML = `
+                <h4 style="color: var(--success);">Comprehensive Mastery Achieved</h4>
+                <p>The candidate has demonstrated exceptional proficiency across all tested domains of Chapter 1: Real Numbers. No critical conceptual gaps were identified. The candidate is fully prepared to progress to subsequent mathematical modules.</p>
+            `;
+            summary.style.borderLeftColor = 'var(--success)';
+        } else {
+            summary.innerHTML = `
+                <h4 style="color: var(--danger);">Targeted Remediation Required</h4>
+                <p>While the candidate showed baseline competence, further review is formally recommended in the following specific areas: <strong>${weaknesses.join(', ')}</strong>.</p>
+                <p>It is advised that the candidate reviews textbook sections corresponding to these topics and attempts secondary problem sets before proceeding to Chapter 2.</p>
+            `;
+            summary.style.borderLeftColor = 'var(--danger)';
+        }
+    }
+</script>
+</body>
+</html>
